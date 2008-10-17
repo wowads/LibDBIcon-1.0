@@ -44,8 +44,8 @@ lib.objects = lib.objects or {}
 lib.callbackRegistered = lib.callbackRegistered or nil
 
 function lib:IconCallback(event, name, key, value, dataobj)
-	if lib.objects[dataobj] then
-		lib.objects[dataobj].icon:SetTexture(dataobj.icon)
+	if lib.objects[name] then
+		lib.objects[name].icon:SetTexture(dataobj.icon)
 	end
 end
 if not lib.callbackRegistered then
@@ -161,7 +161,11 @@ local function updatePosition(button)
 		y = math.max(-radius, math.min(y*diagRadius, radius))
 	end
 	button:SetPoint("CENTER", Minimap, "CENTER", x, y)
-	button:Show()
+	if not button.db.hide then
+		button:Show()
+	else
+		button:Hide()
+	end
 end
 
 local function onClick(self, b) if self.dataObject.OnClick then self.dataObject.OnClick(self, b) end end
@@ -200,7 +204,7 @@ end
 
 function lib:Register(name, object, db)
 	if not object.icon then error("Can't register LDB objects without icons set!") end
-	if lib.objects[object] then error("Already registered, nubcake.") end
+	if lib.objects[name] then error("Already registered, nubcake.") end
 
 	local button = CreateFrame("Button", "LibDBIcon10_"..name, Minimap)
 	button.dataObject = object
@@ -231,7 +235,10 @@ function lib:Register(name, object, db)
 	button:SetScript("OnMouseDown", onMouseDown)
 	button:SetScript("OnMouseUp", onMouseUp)
 	button:SetScript("OnUpdate", updateAndKill)
-	lib.objects[object] = button
+	lib.objects[name] = button
 	updatePosition(button)
 end
+
+function lib:Hide(name) lib.objects[name]:Hide() end
+function lib:Show(name) lib.objects[name]:Show() end
 
