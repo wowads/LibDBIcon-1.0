@@ -241,4 +241,7 @@ end
 
 function lib:Hide(name) lib.objects[name]:Hide() end
 function lib:Show(name) lib.objects[name]:Show() end
+function lib:IsRegistered(name)
+	return lib.objects[name] and true or false
+end
 
