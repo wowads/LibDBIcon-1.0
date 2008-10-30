@@ -245,3 +245,8 @@ function lib:IsRegistered(name)
 	return lib.objects[name] and true or false
 end
 
+function lib:Refresh(name, db)
+	local button = lib.objects[name]
+	if db then button.db = db end
+	updatePosition(button)
+end
