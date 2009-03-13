@@ -101,7 +101,7 @@ local minimapShapes = {
 }
 
 local function updatePosition(button)
-	local angle = math.rad(button.db.minimapPos)
+	local angle = math.rad(button.db.minimapPos or 225)
 	local x, y, q = math.cos(angle), math.sin(angle), 1
 	if x < 0 then q = q + 1 end
 	if y > 0 then q = q + 2 end
