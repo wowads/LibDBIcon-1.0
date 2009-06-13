@@ -64,8 +64,9 @@ local function getAnchors(frame)
 end
 
 local function onEnter(self)
+	if self.isMoving then return end
 	local obj = self.dataObject
-	if not self.isMoving and obj.OnTooltipShow then
+	if obj.OnTooltipShow then
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
 		GameTooltip:SetPoint(getAnchors(self))
 		obj.OnTooltipShow(GameTooltip)
@@ -166,7 +167,6 @@ local function createButton(name, object, db)
 	icon:SetPoint("TOPLEFT", 7, -5)
 	button.icon = icon
 
-	button.total = 0
 	button:SetScript("OnEnter", onEnter)
 	button:SetScript("OnLeave", onLeave)
 	button:SetScript("OnClick", onClick)
