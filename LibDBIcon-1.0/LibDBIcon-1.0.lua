@@ -40,6 +40,7 @@ if not ldb then error(DBICON10 .. " requires LibDataBroker-1.1.") end
 local lib = LibStub:NewLibrary(DBICON10, DBICON10_MINOR)
 if not lib then return end
 
+lib.disabled = lib.disabled or nil
 lib.objects = lib.objects or {}
 lib.callbackRegistered = lib.callbackRegistered or nil
 lib.notCreated = lib.notCreated or {}
@@ -201,7 +202,7 @@ if not lib.loggedIn then
 	f:SetScript("OnEvent", function()
 		for _, object in pairs(lib.objects) do
 			updatePosition(object)
-			if not object.db.hide then object:Show()
+			if not lib.disabled and not object.db.hide then object:Show()
 			else object:Hide() end
 		end
 		lib.loggedIn = true
@@ -212,6 +213,7 @@ if not lib.loggedIn then
 end
 
 function lib:Register(name, object, db)
+	if lib.disabled then return end
 	if not object.icon then error("Can't register LDB objects without icons set!") end
 	if lib.objects[name] or lib.notCreated[name] then error("Already registered, nubcake.") end
 	if not db or not db.hide then
@@ -226,6 +228,7 @@ function lib:Hide(name)
 	lib.objects[name]:Hide()
 end
 function lib:Show(name)
+	if lib.disabled then return end
 	check(name)
 	lib.objects[name]:Show()
 	updatePosition(lib.objects[name])
@@ -234,9 +237,27 @@ function lib:IsRegistered(name)
 	return (lib.objects[name] or lib.notCreated[name]) and true or false
 end
 function lib:Refresh(name, db)
+	if lib.disabled then return end
 	check(name)
 	local button = lib.objects[name]
 	if db then button.db = db end
 	updatePosition(button)
+end
+
+function lib:EnableLibrary()
+	lib.disabled = nil
+	for name, object in pairs(lib.objects) do
+		if not object.db or (object.db and not object.db.hide) then
+			object:Show()
+			updatePosition(object)
+		end
+	end
+end
+
+function lib:DisableLibrary()
+	lib.disabled = true
+	for name, object in pairs(lib.objects) do
+		object:Hide()
+	end
 end
 
