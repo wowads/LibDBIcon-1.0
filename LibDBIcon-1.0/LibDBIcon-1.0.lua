@@ -242,6 +242,7 @@ function lib:Refresh(name, db)
 	local button = lib.objects[name]
 	if db then button.db = db end
 	updatePosition(button)
+	if not db.hide then button:Show() else button:Hide() end
 end
 
 function lib:EnableLibrary()
