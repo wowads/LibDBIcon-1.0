@@ -57,8 +57,8 @@ end
 
 -- Tooltip code ripped from StatBlockCore by Funkydude
 local function getAnchors(frame)
-	local x,y = frame:GetCenter()
-	if not x or not y then return "TOPLEFT", "BOTTOMLEFT" end
+	local x, y = frame:GetCenter()
+	if not x or not y then return "CENTER" end
 	local hhalf = (x > UIParent:GetWidth()*2/3) and "RIGHT" or (x < UIParent:GetWidth()/3) and "LEFT" or ""
 	local vhalf = (y > UIParent:GetHeight()/2) and "TOP" or "BOTTOM"
 	return vhalf..hhalf, frame, (vhalf == "TOP" and "BOTTOM" or "TOP")..hhalf
@@ -103,7 +103,7 @@ local minimapShapes = {
 }
 
 local function updatePosition(button)
-	local angle = math.rad(button.db.minimapPos or 225)
+	local angle = math.rad(button.db and button.db.minimapPos or button.minimapPos or 225)
 	local x, y, q = math.cos(angle), math.sin(angle), 1
 	if x < 0 then q = q + 1 end
 	if y > 0 then q = q + 2 end
@@ -128,7 +128,11 @@ local function onUpdate(self)
 	local px, py = GetCursorPosition()
 	local scale = Minimap:GetEffectiveScale()
 	px, py = px / scale, py / scale
-	self.db.minimapPos = math.deg(math.atan2(py - my, px - mx)) % 360
+	if self.db then
+		self.db.minimapPos = math.deg(math.atan2(py - my, px - mx)) % 360
+	else
+		self.minimapPos = math.deg(math.atan2(py - my, px - mx)) % 360
+	end
 	updatePosition(self)
 end
 
@@ -180,7 +184,7 @@ local function createButton(name, object, db)
 
 	if lib.loggedIn then
 		updatePosition(button)
-		if not db.hide then button:Show()
+		if not db or not db.hide then button:Show()
 		else button:Hide() end
 	end
 end
@@ -202,7 +206,7 @@ if not lib.loggedIn then
 	f:SetScript("OnEvent", function()
 		for _, object in pairs(lib.objects) do
 			updatePosition(object)
-			if not lib.disabled and not object.db.hide then object:Show()
+			if not lib.disabled and (not object.db or not object.db.hide) then object:Show()
 			else object:Hide() end
 		end
 		lib.loggedIn = true
@@ -242,7 +246,11 @@ function lib:Refresh(name, db)
 	local button = lib.objects[name]
 	if db then button.db = db end
 	updatePosition(button)
-	if not db.hide then button:Show() else button:Hide() end
+	if not db or not db.hide then
+		button:Show()
+	else
+		button:Hide()
+	end
 end
 
 function lib:EnableLibrary()
