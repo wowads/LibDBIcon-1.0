@@ -221,10 +221,9 @@ if not lib.loggedIn then
 end
 
 function lib:Register(name, object, db)
-	if lib.disabled then return end
 	if not object.icon then error("Can't register LDB objects without icons set!") end
 	if lib.objects[name] or lib.notCreated[name] then error("Already registered, nubcake.") end
-	if not db or not db.hide then
+	if not lib.disabled and (not db or not db.hide) then
 		createButton(name, object, db)
 	else
 		lib.notCreated[name] = {object, db}
@@ -260,9 +259,15 @@ end
 function lib:EnableLibrary()
 	lib.disabled = nil
 	for name, object in pairs(lib.objects) do
-		if not object.db or (object.db and not object.db.hide) then
+		if not object.db or not object.db.hide then
 			object:Show()
 			updatePosition(object)
+		end
+	end
+	for name, data in pairs(lib.notCreated) do
+		if not data.db or not data.db.hide then
+			createButton(name, data[1], data[2])
+			lib.notCreated[name] = nil
 		end
 	end
 end
