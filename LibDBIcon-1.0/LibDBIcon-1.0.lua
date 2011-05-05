@@ -88,18 +88,18 @@ end
 local minimapShapes = {
 	["ROUND"] = {true, true, true, true},
 	["SQUARE"] = {false, false, false, false},
-	["CORNER-TOPLEFT"] = {true, false, false, false},
+	["CORNER-TOPLEFT"] = {false, false, false, true},
 	["CORNER-TOPRIGHT"] = {false, false, true, false},
 	["CORNER-BOTTOMLEFT"] = {false, true, false, false},
-	["CORNER-BOTTOMRIGHT"] = {false, false, false, true},
+	["CORNER-BOTTOMRIGHT"] = {true, false, false, false},
 	["SIDE-LEFT"] = {true, true, false, false},
 	["SIDE-RIGHT"] = {false, false, true, true},
 	["SIDE-TOP"] = {true, false, true, false},
 	["SIDE-BOTTOM"] = {false, true, false, true},
-	["TRICORNER-TOPLEFT"] = {true, true, true, false},
+	["TRICORNER-TOPLEFT"] = {false, true, true, true},
 	["TRICORNER-TOPRIGHT"] = {true, false, true, true},
 	["TRICORNER-BOTTOMLEFT"] = {true, true, false, true},
-	["TRICORNER-BOTTOMRIGHT"] = {false, true, true, true},
+	["TRICORNER-BOTTOMRIGHT"] = {true, true, true, false},
 }
 
 local function updatePosition(button)
