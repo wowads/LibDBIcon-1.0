@@ -8,7 +8,7 @@ License: GPL v2 or later.
 ]]
 
 --[[
-Copyright (C) 2008-2010 Rabbit
+Copyright (C) 2008-2011 Rabbit
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -158,6 +158,17 @@ local function onDragStop(self)
 	self.isMoving = nil
 end
 
+local defaultCoords = {0, 1, 0, 1}
+local function updateCoord(self)
+	local coords = self:GetParent().dataObject.iconCoords or defaultCoords
+	local deltaX, deltaY = 0, 0
+	if not self:GetParent().isMouseDown then
+		deltaX = (coords[2] - coords[1]) * 0.05
+		deltaY = (coords[4] - coords[3]) * 0.05
+	end
+	self:SetTexCoord(coords[1] + deltaX, coords[2] - deltaX, coords[3] + deltaY, coords[4] - deltaY)
+end
+
 local function createButton(name, object, db)
 	local button = CreateFrame("Button", "LibDBIcon10_"..name, Minimap)
 	button.dataObject = object
@@ -181,17 +192,9 @@ local function createButton(name, object, db)
 	icon:SetTexture(object.icon)
 	icon:SetPoint("TOPLEFT", 7, -6)
 	button.icon = icon
-	
 	button.isMouseDown = false
-	function icon:UpdateCoord()
-		local coords = button.dataObject.iconCoords or {0, 1, 0, 1}
-		local deltaX, deltaY = 0, 0
-		if not button.isMouseDown then
-			deltaX = (coords[2] - coords[1]) * 0.05
-			deltaY = (coords[4] - coords[3]) * 0.05
-		end
-		self:SetTexCoord(coords[1] + deltaX, coords[2] - deltaX, coords[3] + deltaY, coords[4] - deltaY)
-	end
+
+	icon.UpdateCoord = updateCoord
 	icon:UpdateCoord()
 
 	button:SetScript("OnEnter", onEnter)
