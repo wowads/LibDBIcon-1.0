@@ -47,11 +47,16 @@ lib.notCreated = lib.notCreated or {}
 
 function lib:IconCallback(event, name, key, value, dataobj)
 	if lib.objects[name] then
-		lib.objects[name].icon:SetTexture(dataobj.icon)
+		if key == "icon" then
+			lib.objects[name].icon:SetTexture(value)
+		elseif key == "iconCoords" then
+			lib.objects[name].icon:UpdateCoord()
+		end
 	end
 end
 if not lib.callbackRegistered then
 	ldb.RegisterCallback(lib, "LibDataBroker_AttributeChanged__icon", "IconCallback")
+	ldb.RegisterCallback(lib, "LibDataBroker_AttributeChanged__iconCoords", "IconCallback")
 	lib.callbackRegistered = true
 end
 
@@ -120,8 +125,8 @@ local function updatePosition(button)
 end
 
 local function onClick(self, b) if self.dataObject.OnClick then self.dataObject.OnClick(self, b) end end
-local function onMouseDown(self) self.icon:SetTexCoord(0, 1, 0, 1) end
-local function onMouseUp(self) self.icon:SetTexCoord(0.05, 0.95, 0.05, 0.95) end
+local function onMouseDown(self) self.isMouseDown = true; self.icon:UpdateCoord() end
+local function onMouseUp(self) self.isMouseDown = false; self.icon:UpdateCoord() end
 
 local function onUpdate(self)
 	local mx, my = Minimap:GetCenter()
@@ -138,7 +143,8 @@ end
 
 local function onDragStart(self)
 	self:LockHighlight()
-	self.icon:SetTexCoord(0, 1, 0, 1)
+	self.isMouseDown = true
+	self.icon:UpdateCoord()
 	self:SetScript("OnUpdate", onUpdate)
 	self.isMoving = true
 	GameTooltip:Hide()
@@ -146,7 +152,8 @@ end
 
 local function onDragStop(self)
 	self:SetScript("OnUpdate", nil)
-	self.icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+	self.isMouseDown = false
+	self.icon:UpdateCoord()
 	self:UnlockHighlight()
 	self.isMoving = nil
 end
@@ -170,11 +177,22 @@ local function createButton(name, object, db)
 	background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
 	background:SetPoint("TOPLEFT", 7, -5)
 	local icon = button:CreateTexture(nil, "ARTWORK")
-	icon:SetWidth(20); icon:SetHeight(20)
+	icon:SetWidth(17); icon:SetHeight(17)
 	icon:SetTexture(object.icon)
-	icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
-	icon:SetPoint("TOPLEFT", 7, -5)
+	icon:SetPoint("TOPLEFT", 7, -6)
 	button.icon = icon
+	
+	button.isMouseDown = false
+	function icon:UpdateCoord()
+		local coords = button.dataObject.iconCoords or {0, 1, 0, 1}
+		local deltaX, deltaY = 0, 0
+		if not button.isMouseDown then
+			deltaX = (coords[2] - coords[1]) * 0.05
+			deltaY = (coords[4] - coords[3]) * 0.05
+		end
+		self:SetTexCoord(coords[1] + deltaX, coords[2] - deltaX, coords[3] + deltaY, coords[4] - deltaY)
+	end
+	icon:UpdateCoord()
 
 	button:SetScript("OnEnter", onEnter)
 	button:SetScript("OnLeave", onLeave)
