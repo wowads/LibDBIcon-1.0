@@ -276,6 +276,9 @@ function lib:Refresh(name, db)
 		button:Hide()
 	end
 end
+function lib:GetMinimapButton(name)
+	return lib.objects[name]
+end
 
 function lib:EnableLibrary()
 	lib.disabled = nil
