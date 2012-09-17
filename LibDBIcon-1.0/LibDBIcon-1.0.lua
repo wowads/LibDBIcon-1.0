@@ -51,12 +51,24 @@ function lib:IconCallback(event, name, key, value, dataobj)
 			lib.objects[name].icon:SetTexture(value)
 		elseif key == "iconCoords" then
 			lib.objects[name].icon:UpdateCoord()
+		elseif key == "iconR" then
+			local _, g, b = lib.objects[name].icon:GetVertexColor()
+			lib.objects[name].icon:SetVertexColor(value, g, b)
+		elseif key == "iconG" then
+			local r, _, b = lib.objects[name].icon:GetVertexColor()
+			lib.objects[name].icon:SetVertexColor(r, value, b)
+		elseif key == "iconB" then
+			local r, g = lib.objects[name].icon:GetVertexColor()
+			lib.objects[name].icon:SetVertexColor(r, g, value)
 		end
 	end
 end
 if not lib.callbackRegistered then
 	ldb.RegisterCallback(lib, "LibDataBroker_AttributeChanged__icon", "IconCallback")
 	ldb.RegisterCallback(lib, "LibDataBroker_AttributeChanged__iconCoords", "IconCallback")
+	ldb.RegisterCallback(lib, "LibDataBroker_AttributeChanged__iconR", "IconCallback")
+	ldb.RegisterCallback(lib, "LibDataBroker_AttributeChanged__iconG", "IconCallback")
+	ldb.RegisterCallback(lib, "LibDataBroker_AttributeChanged__iconB", "IconCallback")
 	lib.callbackRegistered = true
 end
 
@@ -180,13 +192,13 @@ local function createButton(name, object, db)
 	button.dataObject = object
 	button.db = db
 	button:SetFrameStrata("MEDIUM")
-	button:SetWidth(31); button:SetHeight(31)
+	button:SetSize(31, 31)
 	button:SetFrameLevel(8)
 	button:RegisterForClicks("anyUp")
 	button:RegisterForDrag("LeftButton")
 	button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 	local overlay = button:CreateTexture(nil, "OVERLAY")
-	overlay:SetWidth(53); overlay:SetHeight(53)
+	overlay:SetSize(53, 53)
 	overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
 	overlay:SetPoint("TOPLEFT")
 	local background = button:CreateTexture(nil, "BACKGROUND")
@@ -194,11 +206,14 @@ local function createButton(name, object, db)
 	background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
 	background:SetPoint("TOPLEFT", 7, -5)
 	local icon = button:CreateTexture(nil, "ARTWORK")
-	icon:SetWidth(17); icon:SetHeight(17)
+	icon:SetSize(17, 17)
 	icon:SetTexture(object.icon)
 	icon:SetPoint("TOPLEFT", 7, -6)
 	button.icon = icon
 	button.isMouseDown = false
+
+	local r, g, b = icon:GetVertexColor()
+	icon:SetVertexColor(object.iconR or r, object.iconG or g, object.iconB or b)
 
 	icon.UpdateCoord = updateCoord
 	icon:UpdateCoord()
