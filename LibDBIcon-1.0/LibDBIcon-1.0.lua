@@ -6,14 +6,13 @@
 --
 
 local DBICON10 = "LibDBIcon-1.0"
-local DBICON10_MINOR = 37 -- Bump on changes
+local DBICON10_MINOR = 38 -- Bump on changes
 if not LibStub then error(DBICON10 .. " requires LibStub.") end
 local ldb = LibStub("LibDataBroker-1.1", true)
 if not ldb then error(DBICON10 .. " requires LibDataBroker-1.1.") end
 local lib = LibStub:NewLibrary(DBICON10, DBICON10_MINOR)
 if not lib then return end
 
-lib.disabled = lib.disabled or nil
 lib.objects = lib.objects or {}
 lib.callbackRegistered = lib.callbackRegistered or nil
 lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
@@ -231,15 +230,17 @@ lib.loggedIn = lib.loggedIn or false
 -- load up.
 if not lib.loggedIn then
 	local f = CreateFrame("Frame")
-	f:SetScript("OnEvent", function()
+	f:SetScript("OnEvent", function(f)
 		for _, object in pairs(lib.objects) do
 			updatePosition(object)
-			if not lib.disabled and (not object.db or not object.db.hide) then object:Show()
-			else object:Hide() end
+			if not object.db or not object.db.hide then
+				object:Show()
+			else
+				object:Hide()
+			end
 		end
 		lib.loggedIn = true
 		f:SetScript("OnEvent", nil)
-		f = nil
 	end)
 	f:RegisterEvent("PLAYER_LOGIN")
 end
@@ -251,7 +252,7 @@ end
 function lib:Register(name, object, db)
 	if not object.icon then error("Can't register LDB objects without icons set!") end
 	if lib.objects[name] or lib.notCreated[name] then error("Already registered, nubcake.") end
-	if not lib.disabled and (not db or not db.hide) then
+	if not db or not db.hide then
 		createButton(name, object, db)
 	else
 		lib.notCreated[name] = {object, db}
@@ -283,7 +284,6 @@ function lib:Hide(name)
 	lib.objects[name]:Hide()
 end
 function lib:Show(name)
-	if lib.disabled then return end
 	check(name)
 	lib.objects[name]:Show()
 	updatePosition(lib.objects[name])
@@ -292,7 +292,6 @@ function lib:IsRegistered(name)
 	return (lib.objects[name] or lib.notCreated[name]) and true or false
 end
 function lib:Refresh(name, db)
-	if lib.disabled then return end
 	check(name)
 	local button = lib.objects[name]
 	if db then button.db = db end
@@ -312,29 +311,6 @@ function lib:Refresh(name, db)
 end
 function lib:GetMinimapButton(name)
 	return lib.objects[name]
-end
-
-function lib:EnableLibrary()
-	lib.disabled = nil
-	for name, object in pairs(lib.objects) do
-		if not object.db or not object.db.hide then
-			object:Show()
-			updatePosition(object)
-		end
-	end
-	for name, data in pairs(lib.notCreated) do
-		if not data.db or not data.db.hide then
-			createButton(name, data[1], data[2])
-			lib.notCreated[name] = nil
-		end
-	end
-end
-
-function lib:DisableLibrary()
-	lib.disabled = true
-	for name, object in pairs(lib.objects) do
-		object:Hide()
-	end
 end
 
 -- Upgrade!
