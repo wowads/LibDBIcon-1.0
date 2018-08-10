@@ -6,7 +6,7 @@
 --
 
 local DBICON10 = "LibDBIcon-1.0"
-local DBICON10_MINOR = 39 -- Bump on changes
+local DBICON10_MINOR = 40 -- Bump on changes
 if not LibStub then error(DBICON10 .. " requires LibStub.") end
 local ldb = LibStub("LibDataBroker-1.1", true)
 if not ldb then error(DBICON10 .. " requires LibDataBroker-1.1.") end
@@ -17,6 +17,7 @@ lib.objects = lib.objects or {}
 lib.callbackRegistered = lib.callbackRegistered or nil
 lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
 lib.notCreated = lib.notCreated or {}
+lib.radius = lib.radius or 5
 lib.tooltip = lib.tooltip or CreateFrame("GameTooltip", "LibDBIconTooltip", UIParent, "GameTooltipTemplate")
 local Minimap = Minimap
 
@@ -121,8 +122,8 @@ do
 		if y > 0 then q = q + 2 end
 		local minimapShape = GetMinimapShape and GetMinimapShape() or "ROUND"
 		local quadTable = minimapShapes[minimapShape]
-		local w = (Minimap:GetWidth() / 2) + 5
-		local h = (Minimap:GetHeight() / 2) + 5
+		local w = (Minimap:GetWidth() / 2) + lib.radius
+		local h = (Minimap:GetHeight() / 2) + lib.radius
 		if quadTable[q] then
 			x, y = x*w, y*h
 		else
@@ -403,6 +404,15 @@ function lib:GetButtonList()
 		t[#t+1] = k
 	end
 	return t
+end
+
+function lib:SetButtonRadius(radius)
+	if type(radius) == "number" then
+		lib.radius = radius
+		for k,v in next, lib.objects do
+			updatePosition(v)
+		end
+	end
 end
 
 -- Upgrade!
